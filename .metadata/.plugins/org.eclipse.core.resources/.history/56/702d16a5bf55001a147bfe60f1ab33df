@@ -1,0 +1,52 @@
+package com.amran.proc;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
+
+import org.hibernate.exception.spi.SQLExceptionConverterFactory;
+import org.springframework.stereotype.Repository;
+
+import com.amran.dto.UserDto;
+
+@Repository
+public class StoredProcImpl implements StoredProc {
+
+	@PersistenceContext
+	private EntityManager em;
+
+	@Override
+	public String valPasswd(String password, String userName) {
+		String result = null;
+
+		try {
+			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("nn")
+					.registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
+					.registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
+					.registerStoredProcedureParameter(3, String.class, ParameterMode.OUT).setParameter(1, password)
+					.setParameter(2, userName);
+			storedProcedure.execute();
+			result = (String) storedProcedure.getOutputParameterValue(3);
+		} catch (Exception exception) {
+			System.out.println(exception);
+		}
+		return result;
+	}
+
+	@Override
+	public UserDto getUserInfoByUserName(String userName) {
+		UserDto userDto = new UserDto();
+		Query q = em.createNativeQuery("select * from dba_users where username ="+"'"+userName+"'");
+		Object[] user = (Object[])q.getSingleResult();
+		userDto.setUserName((String)user[0]);
+		userDto.setUserId((Integer)user[1]);
+		
+		return null;
+	}
+
+}

@@ -1,0 +1,51 @@
+<project name="calmisapp" default="build" basedir=".">
+    <description>simple example build file</description>
+    <!-- set global properties for this build -->
+    <property name="src" location="src/main/java"/>
+    <property name="classes" location="target/classes"/>
+    <property name="lib" value="lib" />
+    <property name="spring-boot.version" value="2.2.4.RELEASE" />
+    <property name="app.version" value="1.0.0" />
+    <target name="clean" description="clean up">
+        <!-- Delete the ${build} and ${classes} directory trees -->
+        <delete dir="${classes}"/>
+    </target>
+    <target name="init" depends="clean">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${classes}"/>
+    </target>
+    <path id="class.path">
+        <fileset dir="${lib}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+    <target name="compile" depends="init" description="compile the source " >
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="${src}" destdir="${classes}">
+            <classpath refid="class.path" />
+        </javac>
+    </target>
+    <target name="build" depends="compile">
+        <jar destfile="target/${ant.project.name}-${app.version}.jar" compress="false">
+            <mappedresources>
+                <fileset dir="target/classes" />
+                <globmapper from="*" to="BOOT-INF/classes/*"/>
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="src/main/resources" erroronmissingdir="false"/>
+                <globmapper from="*" to="BOOT-INF/classes/*"/>
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="${lib}" />
+                <globmapper from="*" to="BOOT-INF/lib/*"/>
+            </mappedresources>
+            <zipfileset src="${lib}/loader/spring-boot-loader-${spring-boot.version}.jar" />
+            <manifest>
+                <attribute name="Main-Class" value="org.springframework.boot.loader.JarLauncher" />
+                <attribute name="Start-Class" value="com.calmis.CalmisSpringApplication" />
+            </manifest>
+        </jar>
+    </target>
+</project>
